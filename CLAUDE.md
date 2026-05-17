@@ -12,6 +12,8 @@ The app version is defined in `apps/web/package.json` and exposed to the UI via 
 
 **Before every commit and push to main, bump the version in `apps/web/package.json`.** Use semantic versioning: patch (0.1.x) for fixes and small additions, minor (0.x.0) for new features or completed phases.
 
+After any schema change, run `pnpm --filter @pathfinder/db db:generate` and **commit the generated SQL file** in `packages/db/drizzle/`. The Docker build copies these files into the migrator stage — if they are missing, the build will fail.
+
 ---
 
 ## Project Overview
