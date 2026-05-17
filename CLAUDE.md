@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## README
+
+[README.md](./README.md) documents what the app is, the full local dev setup, production deployment steps, and environment variables. Keep it updated when: the stack changes, new env vars are added, the deployment process changes, or setup steps are added or removed.
+
+---
+
 ## Build Progress
 
 Track completed and outstanding work in [TODO.md](./TODO.md). Check off items as they are finished and refer to it at the start of each session to pick up where things left off.

@@ -135,6 +135,9 @@ Check off items as they are completed. Build order follows Option B (dashboard f
 
 - [x] GitHub Actions workflow (build + push Docker image to ghcr.io)
 - [ ] Add `PATHFINDER_DB_PASSWORD` and `PATHFINDER_OPENAI_API_KEY` to vm-core `.env`
-- [ ] Add `pathfinder.collardserver.co.uk` DNS record and Traefik route
+- [ ] Add `pathfinder.collardserver.co.uk` DNS record pointing to VM
+- [ ] Add Authelia access rule for `pathfinder.collardserver.co.uk` (same pattern as dishes)
 - [ ] First deploy: `./docker-compose.sh start pathfinder`
 - [ ] Verify migrations ran and seed data visible
+
+> No in-app auth code needed. The middleware already passes through in dev and blocks with 401 in production if Authelia headers are absent. Authelia is purely an infra config task.
