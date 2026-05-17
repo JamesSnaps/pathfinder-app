@@ -1,0 +1,43 @@
+name: pathfinder
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://pathfinder:${POSTGRES_PASSWORD:-pathfinder}@db:5432/pathfinder
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pathfinder-net
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pathfinder
+      POSTGRES_USER: pathfinder
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pathfinder}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pathfinder -d pathfinder"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pathfinder-net
+
+volumes:
+  postgres-data:
+
+networks:
+  pathfinder-net:
+    driver: bridge
