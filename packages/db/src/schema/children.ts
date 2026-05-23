@@ -8,6 +8,7 @@ export const children = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
     dateOfBirth: date("date_of_birth").notNull(),
+    avatarUrl: text("avatar_url"),
     notes: text("notes"),
     active: boolean("active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),

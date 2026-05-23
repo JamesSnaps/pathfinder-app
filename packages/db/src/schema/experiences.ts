@@ -23,6 +23,7 @@ export const experiences = pgTable(
     parentConfidenceRequired: confidenceLevelEnum("parent_confidence_required").default("none"),
     repeatable: boolean("repeatable").notNull().default(false),
     notes: text("notes"),
+    imageUrl: text("image_url"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

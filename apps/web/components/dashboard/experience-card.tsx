@@ -1,67 +1,80 @@
 import Link from "next/link";
-import { Badge, cn } from "@pathfinder/ui";
+import { cn } from "@pathfinder/ui";
 import { STATUS_LABELS } from "@pathfinder/shared";
 import type { ChildExperienceStatus } from "@pathfinder/shared";
+import { getCategoryTheme } from "@/lib/category-theme";
+import { ArrowRight } from "lucide-react";
+import { ChildAvatar } from "@/components/children/child-avatar";
 
 interface ExperienceCardProps {
   id: string;
   title: string;
   childName: string;
+  childAvatarUrl?: string | null;
   status: ChildExperienceStatus;
   category: string;
-  badge?: string;
-  badgeVariant?: "default" | "secondary" | "outline";
   meta?: string;
+  badge?: string;
   className?: string;
 }
 
-const CATEGORY_COLOURS: Record<string, string> = {
-  Adventure: "bg-orange-100 text-orange-700",
-  Nature: "bg-green-100 text-green-700",
-  Culture: "bg-purple-100 text-purple-700",
-  Sport: "bg-blue-100 text-blue-700",
-  "Practical Skill": "bg-yellow-100 text-yellow-700",
-  Independence: "bg-teal-100 text-teal-700",
-  Travel: "bg-sky-100 text-sky-700",
-  "People & Community": "bg-pink-100 text-pink-700",
-  STEM: "bg-indigo-100 text-indigo-700",
-  "Family Tradition": "bg-rose-100 text-rose-700",
+const STATUS_COLOURS: Record<ChildExperienceStatus, string> = {
+  idea:           "bg-slate-100 text-slate-600",
+  researching:    "bg-blue-100 text-blue-700",
+  planned:        "bg-amber-100 text-amber-700",
+  booked:         "bg-green-100 text-green-700",
+  done:           "bg-purple-100 text-purple-700",
+  repeat:         "bg-rose-100 text-rose-700",
+  not_interested: "bg-muted text-muted-foreground",
+  paused:         "bg-muted text-muted-foreground",
 };
 
 export function ExperienceCard({
   id,
   title,
   childName,
+  childAvatarUrl,
   status,
   category,
-  badge,
   meta,
+  badge,
   className,
 }: ExperienceCardProps) {
-  const categoryColour = CATEGORY_COLOURS[category] ?? "bg-muted text-muted-foreground";
+  const theme = getCategoryTheme(category);
 
   return (
     <Link
       href={`/experiences/${id}`}
       className={cn(
-        "flex items-start justify-between rounded-lg border bg-card p-3 hover:bg-accent/50 transition-colors",
+        "group flex items-stretch rounded-xl border bg-card shadow-sm overflow-hidden hover:shadow-md transition-all",
         className
       )}
     >
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-foreground truncate">{title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {childName} · {STATUS_LABELS[status]}
-        </p>
-        {meta && <p className="mt-0.5 text-xs text-muted-foreground">{meta}</p>}
+      {/* Category strip + emoji */}
+      <div className={cn("flex flex-col items-center justify-center w-12 shrink-0 gap-1", theme.bg)}>
+        <span className="text-xl leading-none select-none" aria-hidden>{theme.emoji}</span>
       </div>
-      <div className="ml-3 shrink-0 flex flex-col items-end gap-1">
-        <span className={cn("inline-block rounded-full px-2 py-0.5 text-xs font-medium", categoryColour)}>
-          {category}
-        </span>
-        {badge && (
-          <span className="text-xs text-muted-foreground">{badge}</span>
-        )}
+
+      {/* Content */}
+      <div className="flex-1 min-w-0 px-3 py-2.5 flex items-center gap-2">
+        <div className="flex-1 min-w-0 space-y-1">
+          <p className="text-sm font-semibold text-foreground truncate leading-tight">{title}</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+              <ChildAvatar name={childName} avatarUrl={childAvatarUrl} size="xs" />
+              <span className="text-xs text-muted-foreground">{childName}</span>
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <span className={cn("inline-block rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_COLOURS[status])}>
+              {STATUS_LABELS[status]}
+            </span>
+            {badge && (
+              <span className="text-xs text-amber-500 font-medium">{badge}</span>
+            )}
+            {meta && (
+              <span className="text-xs text-muted-foreground">{meta}</span>
+            )}
+          </div>
+        </div>
+        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0 group-hover:text-muted-foreground transition-colors" />
       </div>
     </Link>
   );

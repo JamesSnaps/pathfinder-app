@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { doublePrecision, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { experiencePlaces } from "./experience-places";
 import { activityLog } from "./activity-log";
@@ -15,6 +15,8 @@ export const places = pgTable(
     phone: text("phone"),
     distanceMinutes: integer("distance_minutes"),
     notes: text("notes"),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

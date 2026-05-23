@@ -13,6 +13,14 @@ import { DashboardSection } from "@/components/dashboard/section";
 import { ExperienceCard } from "@/components/dashboard/experience-card";
 import { MilestoneCard } from "@/components/dashboard/milestone-card";
 import type { ChildExperienceStatus } from "@pathfinder/shared";
+import {
+  Compass,
+  Clock,
+  Zap,
+  CalendarCheck,
+  CheckCircle2,
+  Star,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -47,27 +55,28 @@ export default async function DashboardPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">{greeting()}!</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Here&apos;s what&apos;s happening with your adventure plans.
+      <div className="rounded-xl bg-gradient-to-br from-[hsl(152_45%_22%)] to-[hsl(152_45%_16%)] p-6 text-white shadow-md">
+        <p className="text-sm font-medium text-white/60 mb-1">{greeting()}</p>
+        <h1 className="text-2xl font-bold">What adventure is next?</h1>
+        <p className="mt-1.5 text-sm text-white/70">
+          {counts.availableNow} experience{counts.availableNow !== 1 ? "s" : ""} ready now
+          {counts.booked > 0 && ` · ${counts.booked} booked`}
+          {counts.needsAction > 0 && ` · ${counts.needsAction} need${counts.needsAction !== 1 ? "" : "s"} a next step`}
         </p>
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-        <StatCard label="Available now" value={counts.availableNow} />
-        <StatCard label="Coming up soon" value={counts.comingSoon} />
-        <StatCard label="Needs next step" value={counts.needsAction} />
-        <StatCard label="Booked" value={counts.booked} />
-        <StatCard label="Completed" value={counts.completed} />
-        <StatCard label="Favourites" value={counts.favourites} />
+        <StatCard label="Available now"   value={counts.availableNow} icon={Compass}      accent="text-green-600"  iconBg="bg-green-50" />
+        <StatCard label="Coming up"       value={counts.comingSoon}   icon={Clock}        accent="text-amber-600"  iconBg="bg-amber-50" />
+        <StatCard label="Needs next step" value={counts.needsAction}  icon={Zap}          accent="text-red-500"    iconBg="bg-red-50" />
+        <StatCard label="Booked"          value={counts.booked}       icon={CalendarCheck} accent="text-blue-600"  iconBg="bg-blue-50" />
+        <StatCard label="Completed"       value={counts.completed}    icon={CheckCircle2} accent="text-purple-600" iconBg="bg-purple-50" />
+        <StatCard label="Favourites"      value={counts.favourites}   icon={Star}         accent="text-rose-500"   iconBg="bg-rose-50" />
       </div>
 
       {/* Main sections — two column on larger screens */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-
-        {/* Available now */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <DashboardSection
           title="Available now"
           viewAllHref="/experiences?filter=available"
@@ -80,6 +89,7 @@ export default async function DashboardPage() {
                 id={ce.experienceId}
                 title={ce.experience.title}
                 childName={ce.child.name}
+                childAvatarUrl={ce.child.avatarUrl}
                 status={ce.status as ChildExperienceStatus}
                 category={ce.experience.category}
               />
@@ -87,7 +97,6 @@ export default async function DashboardPage() {
           </div>
         </DashboardSection>
 
-        {/* Coming up soon */}
         <DashboardSection
           title="Coming up soon"
           viewAllHref="/experiences?filter=soon"
@@ -107,16 +116,16 @@ export default async function DashboardPage() {
                   id={ce.experienceId}
                   title={ce.experience.title}
                   childName={ce.child.name}
+                  childAvatarUrl={ce.child.avatarUrl}
                   status={ce.status as ChildExperienceStatus}
                   category={ce.experience.category}
-                  meta={`Available in ~${months} month${months !== 1 ? "s" : ""}`}
+                  meta={`Ready in ~${months} month${months !== 1 ? "s" : ""}`}
                 />
               );
             })}
           </div>
         </DashboardSection>
 
-        {/* Needs next action */}
         <DashboardSection
           title="Needs a tiny next step"
           viewAllHref="/plans"
@@ -129,6 +138,7 @@ export default async function DashboardPage() {
                 id={ce.experienceId}
                 title={ce.experience.title}
                 childName={ce.child.name}
+                childAvatarUrl={ce.child.avatarUrl}
                 status={ce.status as ChildExperienceStatus}
                 category={ce.experience.category}
               />
@@ -136,7 +146,6 @@ export default async function DashboardPage() {
           </div>
         </DashboardSection>
 
-        {/* Booked */}
         <DashboardSection
           title="Booked"
           viewAllHref="/plans"
@@ -149,15 +158,19 @@ export default async function DashboardPage() {
                 id={ce.experienceId}
                 title={ce.experience.title}
                 childName={ce.child.name}
+                childAvatarUrl={ce.child.avatarUrl}
                 status={ce.status as ChildExperienceStatus}
                 category={ce.experience.category}
-                meta={ce.targetDate ? `Target: ${new Date(ce.targetDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : undefined}
+                meta={
+                  ce.targetDate
+                    ? `Target: ${new Date(ce.targetDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
+                    : undefined
+                }
               />
             ))}
           </div>
         </DashboardSection>
 
-        {/* Recently completed */}
         <DashboardSection
           title="Recently completed"
           viewAllHref="/experiences?filter=done"
@@ -172,17 +185,21 @@ export default async function DashboardPage() {
                   id={ce.experienceId}
                   title={ce.experience.title}
                   childName={ce.child.name}
+                  childAvatarUrl={ce.child.avatarUrl}
                   status={ce.status as ChildExperienceStatus}
                   category={ce.experience.category}
-                  badge={log?.rating ? `${"★".repeat(log.rating)}` : undefined}
-                  meta={ce.completedDate ? new Date(ce.completedDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : undefined}
+                  badge={log?.rating ? "★".repeat(log.rating) : undefined}
+                  meta={
+                    ce.completedDate
+                      ? new Date(ce.completedDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+                      : undefined
+                  }
                 />
               );
             })}
           </div>
         </DashboardSection>
 
-        {/* Repeatable favourites */}
         <DashboardSection
           title="Worth doing again"
           empty={repeatableFavourites.length === 0 ? "Mark an activity log entry as 'would repeat' to see it here." : undefined}
@@ -194,9 +211,10 @@ export default async function DashboardPage() {
                 id={log.childExperience.experienceId}
                 title={log.childExperience.experience.title}
                 childName={log.childExperience.child.name}
+                childAvatarUrl={log.childExperience.child.avatarUrl}
                 status={log.childExperience.status as ChildExperienceStatus}
                 category={log.childExperience.experience.category}
-                badge={log.rating ? `${"★".repeat(log.rating)}` : undefined}
+                badge={log.rating ? "★".repeat(log.rating) : undefined}
               />
             ))}
           </div>
@@ -211,7 +229,10 @@ export default async function DashboardPage() {
               <MilestoneCard
                 key={i}
                 childName={m.child.name}
+                childAvatarUrl={m.child.avatarUrl}
                 experienceTitle={m.experience.title}
+                experienceId={m.experience.id}
+                category={m.experience.category}
                 daysUntil={m.daysUntil}
                 eligibleDate={m.eligibleDate}
               />

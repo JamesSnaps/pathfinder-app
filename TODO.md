@@ -29,105 +29,118 @@ Check off items as they are completed. Build order follows Option B (dashboard f
   - [x] Upcoming age milestones (eligible within 60 days, not yet added)
 - [x] Dashboard summary stat cards (counts across all children)
 - [x] Dashboard section cards with experience previews
-- [ ] Quick Add button + modal (child → experience → saved as "idea")
+- [x] Quick Add button + modal (child → experience → saved as "idea")
 
 ---
 
-## Phase 2 — Experience Library
+## Phase 2 — Experience Library ✅
 
-- [ ] Experience library page with grid/list view
-- [ ] Filters: category, age range, season, cost, confidence, repeatable
-- [ ] Experience detail page
-  - [ ] Description, age suitability, typical duration
-  - [ ] Linked places (with phone, booking URL, age overrides)
-  - [ ] Per-child status cards
-  - [ ] Actions list grouped by type (task, checklist, kit_item, reminder)
-  - [ ] Planning notes
-  - [ ] Activity log / memory entries
-
----
-
-## Phase 3 — Children
-
-- [ ] Children overview (cards per child with quick stats)
-- [ ] Child profile page
-  - [ ] Current age + date of birth
-  - [ ] Age-appropriate experiences (available now)
-  - [ ] Planned and booked experiences
-  - [ ] Completed experiences
-  - [ ] Upcoming eligibility milestones
-  - [ ] Activity log / memories feed
+- [x] Experience library page with grid/list view
+- [x] Filters: category, age range, season, cost, confidence, repeatable
+- [x] Experience detail page
+  - [x] Description, age suitability, typical duration
+  - [x] Linked places (with phone, booking URL, age overrides)
+  - [x] Per-child status cards
+  - [x] Actions list grouped by type (task, checklist, kit_item, reminder)
+  - [x] Planning notes
+  - [x] Activity log / memory entries
 
 ---
 
-## Phase 4 — Places
+## Phase 3 — Children ✅
 
-- [ ] Places list page
-- [ ] Place detail page (linked experiences, distance, contact info, map embed)
-- [ ] Map embed for each place (Google Maps or OpenStreetMap via postcode)
-
----
-
-## Phase 5 — "What Can We Do Soon?"
-
-- [ ] Filters: child, availability window, distance, season, cost, confidence, status
-- [ ] Results list with place, age eligibility, and next step
-- [ ] Link to experience detail from results
+- [x] Children overview (cards per child with quick stats)
+- [x] Child profile page
+  - [x] Current age + date of birth
+  - [x] Age-appropriate experiences (available now)
+  - [x] Planned and booked experiences
+  - [x] Completed experiences
+  - [x] Upcoming eligibility milestones
+  - [x] Activity log / memories feed
 
 ---
 
-## Phase 6 — My Plans
+## Phase 4 — Places ✅
 
-- [ ] Cross-child view of planned and booked experiences
-- [ ] Group by status (planned / booked)
-- [ ] Link to experience detail
+- [x] Places list page
+- [x] Place detail page (linked experiences, distance, contact info, map embed)
+- [x] Map embed for each place (Google Maps or OpenStreetMap via postcode)
 
 ---
 
-## Phase 7 — Calendar
+## Phase 5 — "What Can We Do Soon?" ✅
 
-- [ ] Calendar view using booked and completed dates
-- [ ] Month view showing booked and completed experiences
-- [ ] Click through to experience detail
+- [x] Filters: child, availability window, distance, season, cost, confidence, status
+- [x] Results list with place, age eligibility, and next step
+- [x] Link to experience detail from results
+
+---
+
+## Phase 6 — My Plans ✅
+
+- [x] Cross-child view of planned and booked experiences
+- [x] Group by status (planned / booked)
+- [x] Link to experience detail
+
+---
+
+## Phase 7 — Calendar ✅
+
+- [x] Calendar view using booked and completed dates
+- [x] Month view showing booked and completed experiences
+- [x] Click through to experience detail
 
 ---
 
 ## Phase 8 — CRUD Forms
 
-- [ ] Add / edit child
-- [ ] Add / edit experience (full field set)
-- [ ] Add / edit place
-- [ ] Link experience to place (with age override)
-- [ ] Add / edit child experience (status, priority, booking ref, target date, planning notes)
-- [ ] Add / complete action (task, checklist, kit_item, reminder)
-- [ ] Add activity log / memory entry (with cost, duration, rating, would_repeat)
+- [x] Add / edit child
+- [x] Add / edit experience (full field set)
+- [x] Add / edit place
+- [x] Link experience to place (with age override)
+- [x] Add / edit child experience (status, priority, booking ref, target date, planning notes)
+- [x] Add / complete action (task, checklist, kit_item, reminder)
+- [x] Add activity log / memory entry (with cost, duration, rating, would_repeat)
 
 ---
 
 ## Phase 9 — Settings
 
-- [ ] Settings page shell
-- [ ] Manage children (list with edit/archive)
-- [ ] Manage experiences (list with edit)
-- [ ] Manage places (list with edit)
+- [x] Settings page shell
+- [x] Manage children (list with edit/archive)
+- [x] Manage experiences (list with edit)
+- [x] Manage places (list with edit)
 
 ---
 
-## Phase 10 — AI Suggestions
+## Phase 10 — AI Suggestions ✅
 
-- [ ] "Suggest experiences" feature using gpt-5.4-nano
-- [ ] Prompt based on child age, completed experiences, season, and location area
-- [ ] Results shown as experience cards that can be added to the library
+- [x] "Suggest experiences" feature using gpt-5.4-nano
+- [x] Prompt based on child age, completed experiences, season, and location area
+- [x] Results shown as experience cards that can be added to the library
 
 ---
 
-## Phase 11 — Polish & PWA
+## Phase 11 — Polish & PWA ✅
 
-- [ ] Mobile bottom nav (Dashboard, Children, Experiences, Plans, More)
-- [ ] PWA icons (192x192, 512x512)
-- [ ] Responsive layout review across all pages
-- [ ] Empty states for all sections
-- [ ] Loading states / skeletons
+- [x] Mobile bottom nav (Dashboard, Children, Experiences, Plans, More)
+- [x] PWA icons (192x192, 512x512)
+- [x] Responsive layout review across all pages
+- [x] Empty states for all sections
+- [x] Loading states / skeletons
+
+---
+
+## Phase 13 — UX: Reduce Back-and-Forth Navigation
+
+See [UX_IMPROVEMENTS.md](./UX_IMPROVEMENTS.md) for full findings and rationale.
+
+- [x] Context-aware FAB (adapts action + label to current route; remove duplicate header buttons)
+- [x] Inline place creation from experience detail (expand mini-form within place picker)
+- [x] Plans page inline editing (booking ref, target date, status, mark complete)
+- [x] Add memory from child profile (add memory CTA on memories feed section)
+- [x] Child profile interactivity (track experience, change status, add next action — all without leaving child profile)
+- [x] Places reverse link (show + manage linked experiences from place detail)
 
 ---
 

@@ -42,6 +42,8 @@ async function seed() {
         websiteUrl: "https://www.brafordcanoes.co.uk",
         distanceMinutes: 20,
         notes: "Good for beginners. Check minimum age per session type.",
+        latitude: 51.3469,
+        longitude: -2.2509,
       },
       {
         name: "Mendip Activity Centre",
@@ -50,6 +52,8 @@ async function seed() {
         websiteUrl: "https://www.mendipactivitycentre.co.uk",
         distanceMinutes: 45,
         notes: "Wide range of outdoor activities. Book well in advance for weekends.",
+        latitude: 51.2517,
+        longitude: -2.5956,
       },
       {
         name: "Avon Springs Fishing Lakes",
@@ -58,6 +62,8 @@ async function seed() {
         websiteUrl: "https://www.avonsprings.co.uk",
         distanceMinutes: 35,
         notes: "Beginner-friendly trout fishing. Rods available to hire.",
+        latitude: 51.2003,
+        longitude: -1.8293,
       },
       {
         name: "Wookey Hole",
@@ -66,6 +72,8 @@ async function seed() {
         websiteUrl: "https://www.wookey.co.uk",
         distanceMinutes: 40,
         notes: "Caves plus fairground. Can be busy in school holidays.",
+        latitude: 51.2309,
+        longitude: -2.6709,
       },
       {
         name: "Cheddar Gorge",
@@ -74,6 +82,8 @@ async function seed() {
         websiteUrl: "https://www.cheddargorge.co.uk",
         distanceMinutes: 45,
         notes: "Gorge walk is free. Caves and Gough's Cave require ticket.",
+        latitude: 51.2777,
+        longitude: -2.7729,
       },
       {
         name: "Westonbirt Arboretum",
@@ -82,6 +92,8 @@ async function seed() {
         websiteUrl: "https://www.forestryengland.uk/westonbirt",
         distanceMinutes: 30,
         notes: "Great in autumn for colour. Free for under 5s.",
+        latitude: 51.6145,
+        longitude: -2.1967,
       },
       {
         name: "Forest of Dean",
@@ -90,6 +102,8 @@ async function seed() {
         websiteUrl: "https://www.forestryengland.uk/forest-of-dean",
         distanceMinutes: 55,
         notes: "Go Ape and Pedalabikeaway cycle hire here.",
+        latitude: 51.7912,
+        longitude: -2.5700,
       },
       {
         name: "SS Great Britain",
@@ -98,6 +112,8 @@ async function seed() {
         websiteUrl: "https://www.ssgreatbritain.org",
         distanceMinutes: 40,
         notes: "Brilliant museum for older children. Includes Being Brunel exhibition.",
+        latitude: 51.4493,
+        longitude: -2.6090,
       },
       {
         name: "Fleet Air Arm Museum",
@@ -106,6 +122,8 @@ async function seed() {
         websiteUrl: "https://www.fleetairarm.com",
         distanceMinutes: 45,
         notes: "Concorde experience. Excellent for aviation interest.",
+        latitude: 51.0077,
+        longitude: -2.6418,
       },
       {
         name: "Longleat",
@@ -114,6 +132,8 @@ async function seed() {
         websiteUrl: "https://www.longleat.co.uk",
         distanceMinutes: 30,
         notes: "Safari park, maze, and house. Half-day minimum. Book well ahead.",
+        latitude: 51.1870,
+        longitude: -2.2812,
       },
       {
         name: "Cotswold Water Park",
@@ -122,6 +142,8 @@ async function seed() {
         websiteUrl: "https://www.waterpark.org",
         distanceMinutes: 45,
         notes: "Multiple operators across the park. Good for watersports.",
+        latitude: 51.6663,
+        longitude: -1.9176,
       },
     ])
     .returning();
