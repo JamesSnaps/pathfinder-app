@@ -3,8 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@pathfinder/db/client";
 import { childExperiences } from "@pathfinder/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export async function trackExperienceForChild(childId: string, experienceId: string) {
+  const existing = await db.query.childExperiences.findFirst({
+    where: and(
+      eq(childExperiences.childId, childId),
+      eq(childExperiences.experienceId, experienceId)
+    ),
+  });
+
+  if (existing) {
+    return { success: false, error: "Already tracked for this child" };
+  }
+
   await db.insert(childExperiences).values({
     childId,
     experienceId,

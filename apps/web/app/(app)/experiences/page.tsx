@@ -94,7 +94,7 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
             {experiences.length} experience{experiences.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <SuggestExperiencesDialog children={activeChildren} />
+        <SuggestExperiencesDialog activeChildren={activeChildren} />
       </div>
 
       <Suspense>

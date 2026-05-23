@@ -19,7 +19,7 @@ export async function getPlans(): Promise<{ booked: PlanItem[]; planned: PlanIte
       child: true,
       experience: true,
     },
-    orderBy: (ce, { asc }) => [asc(ce.targetDate), asc(ce.priority)],
+    orderBy: (ce, { asc, desc }) => [asc(ce.targetDate), desc(ce.priority)],
   });
 
   const booked: PlanItem[] = [];

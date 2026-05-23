@@ -26,10 +26,6 @@ function dateInDays(days: number) {
 // ── Summary counts ────────────────────────────────────────────────────────────
 
 export async function getDashboardCounts() {
-  const allChildren = await db.query.children.findMany({
-    where: eq(children.active, true),
-  });
-
   const available = await db.query.childExperiences.findMany({
     where: notInArray(childExperiences.status, ["done", "not_interested", "paused"]),
     with: { child: true, experience: true },
@@ -37,40 +33,52 @@ export async function getDashboardCounts() {
 
   const booked = await db.query.childExperiences.findMany({
     where: eq(childExperiences.status, "booked"),
+    with: { child: true },
   });
 
   const done = await db.query.childExperiences.findMany({
     where: eq(childExperiences.status, "done"),
+    with: { child: true },
   });
 
   // Repeatable favourites: activity log entries with would_repeat = true
   const repeatable = await db.query.activityLog.findMany({
     where: eq(activityLog.wouldRepeat, true),
+    with: { childExperience: { with: { child: true } } },
   });
-  const repeatableIds = new Set(repeatable.map((l) => l.childExperienceId));
+  const repeatableIds = new Set(
+    repeatable
+      .filter((l) => l.childExperience.child.active)
+      .map((l) => l.childExperienceId)
+  );
 
-  // Available now: eligible based on age and not done
+  // Available now: eligible based on age, not done, active child only
   const availableNow = available.filter((ce) => {
+    if (!ce.child.active) return false;
     const minAge = ce.experience.minimumAgeMonths;
     if (!minAge) return true;
     return monthsUntilEligible(ce.child.dateOfBirth, minAge) <= 0;
   });
 
-  // Needs action: planned/researching with no incomplete task
+  // Needs action: planned/researching with no incomplete task, active child only
   const needsAction = await db.query.childExperiences.findMany({
     where: inArray(childExperiences.status, ["planned", "researching"]),
-    with: { actions: true },
+    with: { child: true, actions: true },
   });
   const needsActionCount = needsAction.filter((ce) =>
-    !ce.actions.some((a) => a.actionType === "task" && !a.completedAt)
+    ce.child.active && !ce.actions.some((a) => a.actionType === "task" && !a.completedAt)
   ).length;
+
+  const activeBooked = booked.filter((ce) => ce.child.active);
+  const activeDone = done.filter((ce) => ce.child.active);
+  const activeAvailable = available.filter((ce) => ce.child.active);
 
   return {
     availableNow: availableNow.length,
-    comingSoon: available.length - availableNow.length,
+    comingSoon: activeAvailable.length - availableNow.length,
     needsAction: needsActionCount,
-    booked: booked.length,
-    completed: done.length,
+    booked: activeBooked.length,
+    completed: activeDone.length,
     favourites: repeatableIds.size,
   };
 }
@@ -78,10 +86,6 @@ export async function getDashboardCounts() {
 // ── Available now ─────────────────────────────────────────────────────────────
 
 export async function getAvailableNow(limit = 6) {
-  const allChildren = await db.query.children.findMany({
-    where: eq(children.active, true),
-  });
-
   const ces = await db.query.childExperiences.findMany({
     where: notInArray(childExperiences.status, ["done", "not_interested", "paused"]),
     with: { child: true, experience: true },
@@ -90,6 +94,7 @@ export async function getAvailableNow(limit = 6) {
 
   return ces
     .filter((ce) => {
+      if (!ce.child.active) return false;
       const minAge = ce.experience.minimumAgeMonths;
       if (!minAge) return true;
       return monthsUntilEligible(ce.child.dateOfBirth, minAge) <= 0;
@@ -107,6 +112,7 @@ export async function getComingSoon(limit = 6) {
 
   return ces
     .filter((ce) => {
+      if (!ce.child.active) return false;
       const minAge = ce.experience.minimumAgeMonths;
       if (!minAge) return false;
       const months = monthsUntilEligible(ce.child.dateOfBirth, minAge);
@@ -130,25 +136,27 @@ export async function getNeedsAction(limit = 6) {
   });
 
   return ces
-    .filter((ce) => !ce.actions.some((a) => a.actionType === "task" && !a.completedAt))
+    .filter((ce) =>
+      ce.child.active && !ce.actions.some((a) => a.actionType === "task" && !a.completedAt)
+    )
     .slice(0, limit);
 }
 
 // ── Booked ────────────────────────────────────────────────────────────────────
 
 export async function getBooked(limit = 6) {
-  return db.query.childExperiences.findMany({
+  const ces = await db.query.childExperiences.findMany({
     where: eq(childExperiences.status, "booked"),
     with: { child: true, experience: true },
     orderBy: (ce, { asc }) => [asc(ce.targetDate)],
-    limit,
   });
+  return ces.filter((ce) => ce.child.active).slice(0, limit);
 }
 
 // ── Recently completed ────────────────────────────────────────────────────────
 
 export async function getRecentlyCompleted(limit = 6) {
-  return db.query.childExperiences.findMany({
+  const ces = await db.query.childExperiences.findMany({
     where: and(
       eq(childExperiences.status, "done"),
       gte(childExperiences.completedDate, dateInDays(-RECENTLY_DAYS))
@@ -159,8 +167,8 @@ export async function getRecentlyCompleted(limit = 6) {
       activityLog: { orderBy: (l, { desc }) => [desc(l.date)], limit: 1 },
     },
     orderBy: (ce, { desc }) => [desc(ce.completedDate)],
-    limit,
   });
+  return ces.filter((ce) => ce.child.active).slice(0, limit);
 }
 
 // ── Repeatable favourites ─────────────────────────────────────────────────────
@@ -185,6 +193,7 @@ export async function getRepeatableFavourites(limit = 6) {
   }
 
   return [...seen.values()]
+    .filter((log) => log.childExperience.child.active)
     .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     .slice(0, limit);
 }

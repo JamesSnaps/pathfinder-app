@@ -18,7 +18,7 @@ import { suggestExperiences, type SuggestedExperience } from "@/app/actions/sugg
 import { addSuggestedExperience } from "@/app/actions/add-suggested-experience";
 
 interface Props {
-  children: { id: string; name: string }[];
+  activeChildren: { id: string; name: string }[];
 }
 
 const SEASON_ICONS: Record<string, string> = {
@@ -50,7 +50,7 @@ function minAgeLabel(months: number | null): string {
   return `${years}y ${rem}mo+`;
 }
 
-export function SuggestExperiencesDialog({ children }: Props) {
+export function SuggestExperiencesDialog({ activeChildren }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string>("all");
   const [suggestions, setSuggestions] = useState<SuggestedExperience[]>([]);
@@ -116,7 +116,7 @@ export function SuggestExperiencesDialog({ children }: Props) {
               className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="all">Any child</option>
-              {children.map((c) => (
+              {activeChildren.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
@@ -143,7 +143,7 @@ export function SuggestExperiencesDialog({ children }: Props) {
           {/* Placeholder before first generate */}
           {!isGenerating && suggestions.length === 0 && !error && (
             <p className="text-sm text-muted-foreground text-center py-6">
-              Pick a child (or leave on "Any child") and hit Generate.
+              Pick a child (or leave on &ldquo;Any child&rdquo;) and hit Generate.
             </p>
           )}
 

@@ -72,22 +72,22 @@ export async function getChildProfile(childId: string) {
 
   const ces = child.childExperiences;
 
-  // Available now: eligible by age, not done/paused/not_interested
+  // Available now: idea/researching that are age-eligible (not yet committed to planning)
   const availableNow = ces.filter((ce) => {
-    if (["done", "not_interested", "paused"].includes(ce.status)) return false;
+    if (!["idea", "researching"].includes(ce.status)) return false;
     const minAge = ce.experience.minimumAgeMonths;
     if (!minAge) return true;
     return monthsUntilEligible(child.dateOfBirth, minAge) <= 0;
   });
 
-  // Planned & booked
+  // Planned & booked: actively committed, regardless of age eligibility
   const plannedAndBooked = ces.filter((ce) =>
-    ["idea", "researching", "planned", "booked"].includes(ce.status)
+    ["planned", "booked"].includes(ce.status)
   );
 
-  // Coming up soon (not yet eligible, within 6 months, not yet added — already added since ces)
+  // Coming up soon: idea/researching not yet age-eligible but within 6 months
   const comingSoon = ces.filter((ce) => {
-    if (["done", "not_interested", "paused"].includes(ce.status)) return false;
+    if (!["idea", "researching"].includes(ce.status)) return false;
     const minAge = ce.experience.minimumAgeMonths;
     if (!minAge) return false;
     const months = monthsUntilEligible(child.dateOfBirth, minAge);
