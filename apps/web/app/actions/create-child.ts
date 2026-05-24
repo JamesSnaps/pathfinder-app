@@ -14,8 +14,13 @@ export async function createChild(fd: FormData) {
   const notes = (fd.get("notes") as string)?.trim() || null;
   const avatarUrl = (fd.get("avatarUrl") as string)?.trim() || null;
 
-  await db.insert(children).values({ name, dateOfBirth, notes, avatarUrl });
+  try {
+    await db.insert(children).values({ name, dateOfBirth, notes, avatarUrl });
 
-  revalidatePath("/children");
-  return { success: true };
+    revalidatePath("/children");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

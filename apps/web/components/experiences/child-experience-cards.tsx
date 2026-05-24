@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import {
   ArrowRight,
   Calendar,
   CheckCircle2,
   Hourglass,
+  Loader2,
   Pencil,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import {
+  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -29,6 +32,8 @@ import { CHILD_EXPERIENCE_STATUSES, STATUS_LABELS } from "@pathfinder/shared";
 import type { ChildExperienceStatus } from "@pathfinder/shared";
 import { createChildExperience } from "@/app/actions/create-child-experience";
 import { updateChildExperience } from "@/app/actions/update-child-experience";
+import { extractActionsFromNotes, type ExtractedAction } from "@/app/actions/extract-actions-from-notes";
+import { createAction } from "@/app/actions/create-action";
 
 const STATUS_COLOURS: Record<ChildExperienceStatus, string> = {
   idea:           "bg-slate-100 text-slate-600",
@@ -111,17 +116,85 @@ type DialogState =
   | { mode: "edit"; child: { id: string; name: string }; ce: ChildExperienceData }
   | null;
 
+const ACTION_TYPE_LABELS_SHORT: Record<string, string> = {
+  task: "Task",
+  checklist: "Checklist",
+  kit_item: "Kit",
+  reminder: "Reminder",
+};
+
 function ChildExperienceDialog({
   experienceId,
+  experienceTitle,
   dialogState,
   onClose,
 }: {
   experienceId: string;
+  experienceTitle: string;
   dialogState: DialogState;
   onClose: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Extract actions from planning notes
+  const planningNotesRef = useRef<HTMLTextAreaElement>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractedActions, setExtractedActions] = useState<ExtractedAction[]>([]);
+  const [selectedActions, setSelectedActions] = useState<Set<number>>(new Set());
+  const [isImporting, setIsImporting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+
+  async function handleExtract() {
+    const notes = planningNotesRef.current?.value?.trim();
+    if (!notes) return;
+    setIsExtracting(true);
+    setExtractError(null);
+    setExtractedActions([]);
+    const childName = dialogState?.child.name ?? "";
+    const result = await extractActionsFromNotes(notes, experienceTitle, childName);
+    setIsExtracting(false);
+    if (result.success && result.actions) {
+      setExtractedActions(result.actions);
+      setSelectedActions(new Set(result.actions.map((_, i) => i)));
+    } else {
+      setExtractError(result.error ?? "Extraction failed");
+    }
+  }
+
+  async function handleImport() {
+    if (!dialogState || dialogState.mode !== "edit") return;
+    const ce = dialogState.ce;
+    setIsImporting(true);
+    setExtractError(null);
+    let failed = 0;
+    for (const i of selectedActions) {
+      const action = extractedActions[i];
+      if (!action) continue;
+      const fd = new FormData();
+      fd.set("description", action.description);
+      fd.set("actionType", action.actionType);
+      if (action.notes) fd.set("notes", action.notes);
+      const result = await createAction(ce.id, experienceId, fd);
+      if (!result.success) failed++;
+    }
+    setIsImporting(false);
+    if (failed > 0) {
+      setExtractError(`${failed} action${failed !== 1 ? "s" : ""} failed to save. Please try again.`);
+      return;
+    }
+    setExtractedActions([]);
+    setSelectedActions(new Set());
+    onClose();
+  }
+
+  function toggleSelect(i: number) {
+    setSelectedActions((prev) => {
+      const s = new Set(prev);
+      s.has(i) ? s.delete(i) : s.add(i);
+      return s;
+    });
+  }
 
   if (!dialogState) return null;
 
@@ -139,6 +212,7 @@ function ChildExperienceDialog({
       if (isEdit && ce) {
         const result = await updateChildExperience(ce.id, experienceId, fd);
         success = result.success;
+        if (!result.success) errorMsg = result.error;
       } else {
         const result = await createChildExperience(experienceId, fd);
         success = result.success;
@@ -215,8 +289,28 @@ function ChildExperienceDialog({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="ce-notes">Planning notes</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="ce-notes">Planning notes</Label>
+            {isEdit && ce && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                onClick={handleExtract}
+                disabled={isExtracting}
+              >
+                {isExtracting ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                {isExtracting ? "Extracting…" : "Extract actions"}
+              </Button>
+            )}
+          </div>
           <Textarea
+            ref={planningNotesRef}
             id="ce-notes"
             name="planningNotes"
             rows={3}
@@ -224,6 +318,68 @@ function ChildExperienceDialog({
             defaultValue={ce?.planningNotes ?? ""}
           />
         </div>
+
+        {extractError && (
+          <p className="text-xs text-destructive">{extractError}</p>
+        )}
+
+        {extractedActions.length > 0 && (
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3 text-primary" />
+                {extractedActions.length} action{extractedActions.length !== 1 ? "s" : ""} found
+              </p>
+              <button
+                type="button"
+                onClick={() => { setExtractedActions([]); setSelectedActions(new Set()); }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Dismiss
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              {extractedActions.map((action, i) => (
+                <label key={i} className="flex items-start gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={selectedActions.has(i)}
+                    onChange={() => toggleSelect(i)}
+                    className="mt-0.5 h-3.5 w-3.5 rounded accent-primary"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={cn(
+                        "text-xs leading-snug",
+                        !selectedActions.has(i) && "text-muted-foreground line-through"
+                      )}>
+                        {action.description}
+                      </span>
+                      <Badge variant="outline" className="text-[10px] py-0 h-4 shrink-0">
+                        {ACTION_TYPE_LABELS_SHORT[action.actionType] ?? action.actionType}
+                      </Badge>
+                    </div>
+                    {action.notes && (
+                      <p className="text-xs text-muted-foreground italic mt-0.5">{action.notes}</p>
+                    )}
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <Button
+              type="button"
+              size="sm"
+              className="w-full h-7 text-xs"
+              disabled={selectedActions.size === 0 || isImporting}
+              onClick={handleImport}
+            >
+              {isImporting && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+              Import {selectedActions.size} selected
+            </Button>
+          </div>
+        )}
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
@@ -242,9 +398,11 @@ function ChildExperienceDialog({
 
 export function ChildExperienceCards({
   experienceId,
+  experienceTitle,
   perChild,
 }: {
   experienceId: string;
+  experienceTitle: string;
   perChild: ChildData[];
 }) {
   const [dialogState, setDialogState] = useState<DialogState>(null);
@@ -427,6 +585,7 @@ export function ChildExperienceCards({
 
         <ChildExperienceDialog
           experienceId={experienceId}
+          experienceTitle={experienceTitle}
           dialogState={dialogState}
           onClose={() => setDialogState(null)}
         />

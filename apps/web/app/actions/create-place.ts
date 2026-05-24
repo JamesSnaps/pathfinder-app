@@ -15,20 +15,25 @@ export async function createPlace(fd: FormData) {
 
   const postcode = raw("postcode");
   const location = raw("location");
-  const coords = await geocodePlace(postcode, location, name);
+  try {
+    const coords = await geocodePlace(postcode, location, name);
 
-  await db.insert(places).values({
-    name,
-    location,
-    postcode,
-    websiteUrl: raw("websiteUrl"),
-    bookingUrl: raw("bookingUrl"),
-    phone: raw("phone"),
-    distanceMinutes: isNaN(distanceMinutes ?? NaN) ? null : distanceMinutes,
-    notes: raw("notes"),
-    ...(coords ?? {}),
-  });
+    await db.insert(places).values({
+      name,
+      location,
+      postcode,
+      websiteUrl: raw("websiteUrl"),
+      bookingUrl: raw("bookingUrl"),
+      phone: raw("phone"),
+      distanceMinutes: isNaN(distanceMinutes ?? NaN) ? null : distanceMinutes,
+      notes: raw("notes"),
+      ...(coords ?? {}),
+    });
 
-  revalidatePath("/places");
-  return { success: true };
+    revalidatePath("/places");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

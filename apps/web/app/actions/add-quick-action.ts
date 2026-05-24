@@ -12,13 +12,18 @@ export async function addQuickAction(
 ) {
   if (!description.trim()) return { success: false, error: "Description is required" };
 
-  await db.insert(actions).values({
-    childExperienceId,
-    description: description.trim(),
-    actionType: "task",
-  });
+  try {
+    await db.insert(actions).values({
+      childExperienceId,
+      description: description.trim(),
+      actionType: "task",
+    });
 
-  revalidatePath(`/children/${childId}`);
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath(`/children/${childId}`);
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

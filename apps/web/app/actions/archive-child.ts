@@ -6,8 +6,13 @@ import { children } from "@pathfinder/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function setChildActive(childId: string, active: boolean) {
-  await db.update(children).set({ active }).where(eq(children.id, childId));
-  revalidatePath("/settings");
-  revalidatePath("/children");
-  return { success: true };
+  try {
+    await db.update(children).set({ active }).where(eq(children.id, childId));
+    revalidatePath("/settings");
+    revalidatePath("/children");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

@@ -17,17 +17,22 @@ export async function updateChildExperience(
   const priorityRaw = raw("priority");
   const priority = priorityRaw ? parseInt(priorityRaw, 10) : 0;
 
-  await db
-    .update(childExperiences)
-    .set({
-      status,
-      priority: isNaN(priority) ? 0 : priority,
-      targetDate: raw("targetDate"),
-      bookingReference: raw("bookingReference"),
-      planningNotes: raw("planningNotes"),
-    })
-    .where(eq(childExperiences.id, childExperienceId));
+  try {
+    await db
+      .update(childExperiences)
+      .set({
+        status,
+        priority: isNaN(priority) ? 0 : priority,
+        targetDate: raw("targetDate"),
+        bookingReference: raw("bookingReference"),
+        planningNotes: raw("planningNotes"),
+      })
+      .where(eq(childExperiences.id, childExperienceId));
 
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

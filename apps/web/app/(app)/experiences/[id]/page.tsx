@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getExperienceDetail } from "@/lib/experience-queries";
 import { getAllPlaces } from "@/lib/places-queries";
+import { getAppConfig } from "@/lib/settings-queries";
 import { ArrowLeft } from "lucide-react";
 import { ExperienceInlineEditor } from "@/components/experiences/experience-inline-editor";
 import { ExperiencePlacesMapPanel } from "@/components/experiences/experience-places-map-panel";
@@ -31,7 +32,10 @@ export default async function ExperienceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [exp, allPlaces] = await Promise.all([getExperienceDetail(id), getAllPlaces()]);
+  const [exp, allPlaces, config] = await Promise.all([getExperienceDetail(id), getAllPlaces(), getAppConfig()]);
+  const homeLocation = config?.homeLatitude != null && config.homeLongitude != null
+    ? { lat: config.homeLatitude, lng: config.homeLongitude }
+    : null;
   if (!exp) notFound();
 
   // Serialize dates so perChild data is safe to pass to client components
@@ -107,7 +111,11 @@ export default async function ExperienceDetailPage({
       />
 
       {/* Per-child status */}
-      <ChildExperienceCards experienceId={exp.id} perChild={perChildForClient} />
+      <ChildExperienceCards
+        experienceId={exp.id}
+        experienceTitle={exp.title}
+        perChild={perChildForClient}
+      />
 
       {/* Places */}
       <section className="space-y-0">
@@ -131,14 +139,25 @@ export default async function ExperienceDetailPage({
             },
           }))}
           allPlaces={allPlaces.map((p) => ({ id: p.id, name: p.name }))}
+          homeLocation={homeLocation}
         />
       </section>
 
       {/* Actions */}
-      <ActionsPanel experienceId={exp.id} perChild={perChildForClient} />
+      <ActionsPanel
+        experienceId={exp.id}
+        experienceTitle={exp.title}
+        experienceCategory={exp.category}
+        perChild={perChildForClient}
+      />
 
       {/* Memories */}
-      <MemoriesPanel experienceId={exp.id} perChild={perChildForClient} />
+      <MemoriesPanel
+        experienceId={exp.id}
+        experienceTitle={exp.title}
+        experienceCategory={exp.category}
+        perChild={perChildForClient}
+      />
     </div>
   );
 }

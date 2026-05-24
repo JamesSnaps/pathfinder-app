@@ -18,18 +18,23 @@ export async function createActivityLog(
   const durationRaw = raw("durationMinutes");
   const durationMinutes = durationRaw ? parseInt(durationRaw, 10) : null;
 
-  await db.insert(activityLog).values({
-    childExperienceId,
-    date,
-    whatHappened: raw("whatHappened"),
-    childReaction: raw("childReaction"),
-    parentNotes: raw("parentNotes"),
-    rating: rating && !isNaN(rating) ? rating : null,
-    wouldRepeat: fd.get("wouldRepeat") === "on",
-    costActual: raw("costActual"),
-    durationMinutes: durationMinutes && !isNaN(durationMinutes) ? durationMinutes : null,
-  });
+  try {
+    await db.insert(activityLog).values({
+      childExperienceId,
+      date,
+      whatHappened: raw("whatHappened"),
+      childReaction: raw("childReaction"),
+      parentNotes: raw("parentNotes"),
+      rating: rating && !isNaN(rating) ? rating : null,
+      wouldRepeat: fd.get("wouldRepeat") === "on",
+      costActual: raw("costActual"),
+      durationMinutes: durationMinutes && !isNaN(durationMinutes) ? durationMinutes : null,
+    });
 
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

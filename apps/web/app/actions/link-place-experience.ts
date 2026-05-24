@@ -12,16 +12,21 @@ export async function linkPlaceExperience(placeId: string, fd: FormData) {
   const raw = (key: string) => (fd.get(key) as string | null)?.trim() || null;
   const ageOverride = raw("minimumAgeMonthsOverride");
 
-  await db.insert(experiencePlaces).values({
-    experienceId,
-    placeId,
-    minimumAgeMonthsOverride: ageOverride ? parseInt(ageOverride, 10) : null,
-    notes: raw("notes"),
-  });
+  try {
+    await db.insert(experiencePlaces).values({
+      experienceId,
+      placeId,
+      minimumAgeMonthsOverride: ageOverride ? parseInt(ageOverride, 10) : null,
+      notes: raw("notes"),
+    });
 
-  revalidatePath(`/places/${placeId}`);
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath(`/places/${placeId}`);
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }
 
 export async function unlinkPlaceExperience(
@@ -29,8 +34,13 @@ export async function unlinkPlaceExperience(
   placeId: string,
   experienceId: string,
 ) {
-  await db.delete(experiencePlaces).where(eq(experiencePlaces.id, experiencePlaceId));
-  revalidatePath(`/places/${placeId}`);
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+  try {
+    await db.delete(experiencePlaces).where(eq(experiencePlaces.id, experiencePlaceId));
+    revalidatePath(`/places/${placeId}`);
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

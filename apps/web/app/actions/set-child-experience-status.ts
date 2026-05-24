@@ -13,14 +13,19 @@ export async function setChildExperienceStatus(
   childId: string,
   status: Status,
 ) {
-  await db
-    .update(childExperiences)
-    .set({ status })
-    .where(eq(childExperiences.id, childExperienceId));
+  try {
+    await db
+      .update(childExperiences)
+      .set({ status })
+      .where(eq(childExperiences.id, childExperienceId));
 
-  revalidatePath(`/children/${childId}`);
-  revalidatePath(`/experiences/${experienceId}`);
-  revalidatePath("/dashboard");
-  revalidatePath("/plans");
-  return { success: true };
+    revalidatePath(`/children/${childId}`);
+    revalidatePath(`/experiences/${experienceId}`);
+    revalidatePath("/dashboard");
+    revalidatePath("/plans");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

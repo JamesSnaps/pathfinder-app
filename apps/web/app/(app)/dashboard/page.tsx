@@ -12,6 +12,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { DashboardSection } from "@/components/dashboard/section";
 import { ExperienceCard } from "@/components/dashboard/experience-card";
 import { MilestoneCard } from "@/components/dashboard/milestone-card";
+import { WeekendPlannerWidget } from "@/components/dashboard/weekend-planner-widget";
 import type { ChildExperienceStatus } from "@pathfinder/shared";
 import {
   Compass,
@@ -74,6 +75,9 @@ export default async function DashboardPage() {
         <StatCard label="Completed"       value={counts.completed}    icon={CheckCircle2} accent="text-purple-600" iconBg="bg-purple-50" />
         <StatCard label="Favourites"      value={counts.favourites}   icon={Star}         accent="text-rose-500"   iconBg="bg-rose-50" />
       </div>
+
+      {/* Weekend planner — full width */}
+      <WeekendPlannerWidget />
 
       {/* Main sections — two column on larger screens */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

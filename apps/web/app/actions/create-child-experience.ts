@@ -15,16 +15,21 @@ export async function createChildExperience(experienceId: string, fd: FormData) 
   const priorityRaw = raw("priority");
   const priority = priorityRaw ? parseInt(priorityRaw, 10) : 0;
 
-  await db.insert(childExperiences).values({
-    childId,
-    experienceId,
-    status,
-    priority: isNaN(priority) ? 0 : priority,
-    targetDate: raw("targetDate"),
-    bookingReference: raw("bookingReference"),
-    planningNotes: raw("planningNotes"),
-  });
+  try {
+    await db.insert(childExperiences).values({
+      childId,
+      experienceId,
+      status,
+      priority: isNaN(priority) ? 0 : priority,
+      targetDate: raw("targetDate"),
+      bookingReference: raw("bookingReference"),
+      planningNotes: raw("planningNotes"),
+    });
 
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

@@ -19,22 +19,27 @@ export async function createExperience(fd: FormData) {
     return isNaN(n) ? null : n;
   };
 
-  await db.insert(experiences).values({
-    title,
-    category,
-    description: raw("description"),
-    minimumAgeMonths: num("minimumAgeMonths"),
-    idealAgeMinMonths: num("idealAgeMinMonths"),
-    idealAgeMaxMonths: num("idealAgeMaxMonths"),
-    season: (raw("season") as "any" | "spring" | "summer" | "autumn" | "winter") ?? "any",
-    costBand: (raw("costBand") as "free" | "low" | "medium" | "high") || null,
-    typicalDurationHours: raw("typicalDurationHours"),
-    parentConfidenceRequired:
-      (raw("parentConfidenceRequired") as "none" | "low" | "medium" | "high") ?? "none",
-    repeatable: fd.get("repeatable") === "on",
-    notes: raw("notes"),
-  });
+  try {
+    await db.insert(experiences).values({
+      title,
+      category,
+      description: raw("description"),
+      minimumAgeMonths: num("minimumAgeMonths"),
+      idealAgeMinMonths: num("idealAgeMinMonths"),
+      idealAgeMaxMonths: num("idealAgeMaxMonths"),
+      season: (raw("season") as "any" | "spring" | "summer" | "autumn" | "winter") ?? "any",
+      costBand: (raw("costBand") as "free" | "low" | "medium" | "high") || null,
+      typicalDurationHours: raw("typicalDurationHours"),
+      parentConfidenceRequired:
+        (raw("parentConfidenceRequired") as "none" | "low" | "medium" | "high") ?? "none",
+      repeatable: fd.get("repeatable") === "on",
+      notes: raw("notes"),
+    });
 
-  revalidatePath("/experiences");
-  return { success: true };
+    revalidatePath("/experiences");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

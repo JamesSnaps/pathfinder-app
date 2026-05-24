@@ -19,6 +19,22 @@ export interface SuggestedExperience {
   why: string;
 }
 
+export type SuggestModel = "gpt-4.1-nano" | "gpt-5.4-nano";
+
+export interface SuggestOptions {
+  childId: string | null;
+  model?: SuggestModel;
+  direction?: string;
+  durationPreference?: "any" | "short" | "half-day" | "full-day";
+  categoryFocus?: string;
+  indoorOutdoor?: "any" | "outdoor" | "indoor";
+  costPreference?: "any" | "free" | "low" | "medium" | "high";
+}
+
+function isGpt5(model: string): boolean {
+  return model.startsWith("gpt-5");
+}
+
 function getCurrentSeason(): "spring" | "summer" | "autumn" | "winter" {
   const month = new Date().getMonth() + 1;
   if (month >= 3 && month <= 5) return "spring";
@@ -27,7 +43,7 @@ function getCurrentSeason(): "spring" | "summer" | "autumn" | "winter" {
   return "winter";
 }
 
-export async function suggestExperiences(childId: string | null): Promise<{
+export async function suggestExperiences(options: SuggestOptions): Promise<{
   success: boolean;
   suggestions?: SuggestedExperience[];
   error?: string;
@@ -35,6 +51,9 @@ export async function suggestExperiences(childId: string | null): Promise<{
   if (!env.OPENAI_API_KEY) {
     return { success: false, error: "OpenAI API key is not configured." };
   }
+
+  const { childId, direction, durationPreference, categoryFocus, indoorOutdoor, costPreference } = options;
+  const model: SuggestModel = options.model ?? "gpt-5.4-nano";
 
   const allExperiences = await db.query.experiences.findMany({
     columns: { title: true },
@@ -71,12 +90,29 @@ Completed experiences: ${doneExperiences.length > 0 ? doneExperiences.join(", ")
   const season = getCurrentSeason();
   const categories = EXPERIENCE_CATEGORIES.join(", ");
 
+  const durationLabels: Record<string, string> = {
+    short: "short (under 2 hours)",
+    "half-day": "half day (2–4 hours)",
+    "full-day": "full day (4+ hours)",
+  };
+
+  const preferences: string[] = [];
+  if (direction?.trim()) preferences.push(`Direction from the user: "${direction.trim()}"`);
+  if (durationPreference && durationPreference !== "any") preferences.push(`Preferred duration: ${durationLabels[durationPreference]}`);
+  if (categoryFocus && categoryFocus !== "any") preferences.push(`Focus on category: ${categoryFocus}`);
+  if (indoorOutdoor && indoorOutdoor !== "any") preferences.push(`Prefer ${indoorOutdoor} activities`);
+  if (costPreference && costPreference !== "any") preferences.push(`Preferred cost band: ${costPreference}`);
+
+  const preferencesBlock = preferences.length > 0
+    ? `\nUser preferences for this batch:\n${preferences.map((p) => `- ${p}`).join("\n")}\n`
+    : "";
+
   const prompt = `You are a helpful family activity planner for a family based near Corsham/Bath, UK. Suggest 6 new childhood experiences that would make for lasting memories.
 
 ${childContext || "Suggesting for a general family with young children."}
 Current season: ${season}
 Location: Corsham/Bath area, UK
-
+${preferencesBlock}
 Do NOT suggest any of these already in the library:
 ${existingTitles.join(", ")}
 
@@ -95,15 +131,23 @@ Focus on activities that are:
 - Realistically available near Bath/Corsham (Avon, Somerset, Wiltshire, Cotswolds, Forest of Dean)
 - Age-appropriate given the child's current age
 - Seasonally relevant (it's currently ${season})
-- Genuinely fun and memorable, not just educational`;
+- Genuinely fun and memorable, not just educational
+- Matching the user preferences above (treat them as strong guidance, not hard filters)`;
 
   try {
     const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+
+    // gpt-5.x uses max_completion_tokens and does not accept temperature.
+    // gpt-4.x uses max_tokens and accepts temperature.
+    const tokenParam = isGpt5(model)
+      ? { max_completion_tokens: 2000 }
+      : { max_tokens: 2000, temperature: preferences.length > 0 ? 0.7 : 0.8 };
+
     const response = await openai.chat.completions.create({
-      model: "gpt-5.4-nano",
+      model,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      temperature: 0.8,
+      ...tokenParam,
     });
 
     const raw = response.choices[0]?.message?.content ?? "{}";

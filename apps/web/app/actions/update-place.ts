@@ -16,24 +16,29 @@ export async function updatePlace(id: string, fd: FormData) {
 
   const postcode = raw("postcode");
   const location = raw("location");
-  const coords = await geocodePlace(postcode, location, name);
+  try {
+    const coords = await geocodePlace(postcode, location, name);
 
-  await db
-    .update(places)
-    .set({
-      name,
-      location,
-      postcode,
-      websiteUrl: raw("websiteUrl"),
-      bookingUrl: raw("bookingUrl"),
-      phone: raw("phone"),
-      distanceMinutes: isNaN(distanceMinutes ?? NaN) ? null : distanceMinutes,
-      notes: raw("notes"),
-      ...(coords ?? {}),
-    })
-    .where(eq(places.id, id));
+    await db
+      .update(places)
+      .set({
+        name,
+        location,
+        postcode,
+        websiteUrl: raw("websiteUrl"),
+        bookingUrl: raw("bookingUrl"),
+        phone: raw("phone"),
+        distanceMinutes: isNaN(distanceMinutes ?? NaN) ? null : distanceMinutes,
+        notes: raw("notes"),
+        ...(coords ?? {}),
+      })
+      .where(eq(places.id, id));
 
-  revalidatePath(`/places/${id}`);
-  revalidatePath("/places");
-  return { success: true };
+    revalidatePath(`/places/${id}`);
+    revalidatePath("/places");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

@@ -16,14 +16,19 @@ export async function createAction(
   const actionType = (raw("actionType") ?? "task") as
     "task" | "checklist" | "kit_item" | "reminder";
 
-  await db.insert(actions).values({
-    childExperienceId,
-    description,
-    actionType,
-    dueDate: raw("dueDate"),
-    notes: raw("notes"),
-  });
+  try {
+    await db.insert(actions).values({
+      childExperienceId,
+      description,
+      actionType,
+      dueDate: raw("dueDate"),
+      notes: raw("notes"),
+    });
 
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

@@ -13,14 +13,19 @@ const SOON_MONTHS = 6;
 const MILESTONE_DAYS = 60;
 const RECENTLY_DAYS = 60;
 
-function today() {
-  return new Date().toISOString().split("T")[0];
+function localDateISO(d: Date): string {
+  // Use local date parts — toISOString() is UTC and would return the wrong
+  // date in BST (UTC+1) when d is local midnight.
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function dateInDays(days: number) {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  return localDateISO(d);
 }
 
 // ── Summary counts ────────────────────────────────────────────────────────────

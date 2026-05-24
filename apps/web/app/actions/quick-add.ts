@@ -17,13 +17,18 @@ export async function quickAddExperience(childId: string, experienceId: string) 
     return { success: false, error: "Already added for this child" };
   }
 
-  await db.insert(childExperiences).values({
-    childId,
-    experienceId,
-    status: "idea",
-  });
+  try {
+    await db.insert(childExperiences).values({
+      childId,
+      experienceId,
+      status: "idea",
+    });
 
-  revalidatePath("/dashboard");
-  revalidatePath("/children");
-  return { success: true };
+    revalidatePath("/dashboard");
+    revalidatePath("/children");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

@@ -16,12 +16,17 @@ export async function updateChild(id: string, fd: FormData) {
   const active = fd.get("active") === "on";
   const avatarUrl = (fd.get("avatarUrl") as string)?.trim() || null;
 
-  await db
-    .update(children)
-    .set({ name, dateOfBirth, notes, active, avatarUrl })
-    .where(eq(children.id, id));
+  try {
+    await db
+      .update(children)
+      .set({ name, dateOfBirth, notes, active, avatarUrl })
+      .where(eq(children.id, id));
 
-  revalidatePath(`/children/${id}`);
-  revalidatePath("/children");
-  return { success: true };
+    revalidatePath(`/children/${id}`);
+    revalidatePath("/children");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }

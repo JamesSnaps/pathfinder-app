@@ -2,19 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@pathfinder/db/client";
-import { actions } from "@pathfinder/db/schema";
+import { activityLog } from "@pathfinder/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function toggleActionComplete(
-  actionId: string,
+export async function updateActivityLogNarrative(
+  logId: string,
   experienceId: string,
-  completed: boolean,
-) {
+  narrative: string,
+): Promise<{ success: boolean; error?: string }> {
   try {
     await db
-      .update(actions)
-      .set({ completedAt: completed ? new Date() : null })
-      .where(eq(actions.id, actionId));
+      .update(activityLog)
+      .set({ whatHappened: narrative })
+      .where(eq(activityLog.id, logId));
 
     revalidatePath(`/experiences/${experienceId}`);
     return { success: true };

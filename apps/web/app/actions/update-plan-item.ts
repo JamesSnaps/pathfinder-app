@@ -18,13 +18,18 @@ export async function updatePlanItem(
   experienceId: string,
   updates: PlanUpdates,
 ) {
-  await db
-    .update(childExperiences)
-    .set(updates)
-    .where(eq(childExperiences.id, childExperienceId));
+  try {
+    await db
+      .update(childExperiences)
+      .set(updates)
+      .where(eq(childExperiences.id, childExperienceId));
 
-  revalidatePath("/plans");
-  revalidatePath("/dashboard");
-  revalidatePath(`/experiences/${experienceId}`);
-  return { success: true };
+    revalidatePath("/plans");
+    revalidatePath("/dashboard");
+    revalidatePath(`/experiences/${experienceId}`);
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
 }
