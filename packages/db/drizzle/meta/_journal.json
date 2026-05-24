@@ -22,6 +22,13 @@
       "when": 1779026385115,
       "tag": "0002_productive_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779605695284,
+      "tag": "0003_open_tarot",
+      "breakpoints": true
     }
   ]
 }

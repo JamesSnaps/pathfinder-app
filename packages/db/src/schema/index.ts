@@ -5,3 +5,4 @@ export * from "./experience-places";
 export * from "./child-experiences";
 export * from "./actions";
 export * from "./activity-log";
+export * from "./app-config";

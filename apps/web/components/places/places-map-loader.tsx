@@ -15,6 +15,14 @@ const PlacesMap = nextDynamic(
   }
 );
 
-export function PlacesMapLoader({ places, height }: { places: MapPlace[]; height?: string }) {
-  return <PlacesMap places={places} height={height} />;
+export function PlacesMapLoader({
+  places,
+  height,
+  homeLocation,
+}: {
+  places: MapPlace[];
+  height?: string;
+  homeLocation?: { lat: number; lng: number };
+}) {
+  return <PlacesMap places={places} height={height} homeLocation={homeLocation} />;
 }

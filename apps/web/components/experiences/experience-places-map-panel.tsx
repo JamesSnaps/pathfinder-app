@@ -39,9 +39,10 @@ type Props = {
   experienceId: string;
   linkedPlaces: LinkedPlace[];
   allPlaces: { id: string; name: string }[];
+  homeLocation?: { lat: number; lng: number } | null;
 };
 
-export function ExperiencePlacesMapPanel({ experienceId, linkedPlaces, allPlaces }: Props) {
+export function ExperiencePlacesMapPanel({ experienceId, linkedPlaces, allPlaces, homeLocation }: Props) {
   const [view, setView] = useState<"list" | "map">("list");
 
   const mappable: MapPlace[] = linkedPlaces
@@ -87,7 +88,7 @@ export function ExperiencePlacesMapPanel({ experienceId, linkedPlaces, allPlaces
 
       {view === "map" ? (
         <div className="space-y-2">
-          <PlacesMap places={mappable} height="320px" linkToDetail />
+          <PlacesMap places={mappable} height="320px" linkToDetail homeLocation={homeLocation ?? undefined} />
           {mappable.length < linkedPlaces.length && (
             <p className="text-xs text-muted-foreground">
               {linkedPlaces.length - mappable.length} place
@@ -100,6 +101,7 @@ export function ExperiencePlacesMapPanel({ experienceId, linkedPlaces, allPlaces
           experienceId={experienceId}
           linkedPlaces={linkedPlaces}
           allPlaces={allPlaces}
+          homeLocation={homeLocation ?? null}
         />
       )}
     </div>

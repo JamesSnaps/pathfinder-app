@@ -1,14 +1,16 @@
 import Link from "next/link";
-import { ExternalLink, MapPin, BookOpen, Users } from "lucide-react";
+import { ExternalLink, MapPin, BookOpen, Users, Home } from "lucide-react";
 import { getAllChildren } from "@/lib/children-queries";
 import { getExperiences } from "@/lib/experience-queries";
 import { getAllPlaces } from "@/lib/places-queries";
+import { getAppConfig } from "@/lib/settings-queries";
 import { EditChildDialog } from "@/components/children/edit-child-dialog";
 import { ArchiveChildButton } from "@/components/children/archive-child-button";
 import { EditPlaceDialog } from "@/components/places/edit-place-dialog";
 import { AddChildDialog } from "@/components/children/add-child-dialog";
 import { AddExperienceDialog } from "@/components/experiences/add-experience-dialog";
 import { AddPlaceDialog } from "@/components/places/add-place-dialog";
+import { HomeLocationForm } from "@/components/settings/home-location-form";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +43,11 @@ function ageFromDOB(dateOfBirth: string) {
 }
 
 export default async function SettingsPage() {
-  const [allChildren, allExperiences, allPlaces] = await Promise.all([
+  const [allChildren, allExperiences, allPlaces, config] = await Promise.all([
     getAllChildren(),
     getExperiences(),
     getAllPlaces(),
+    getAppConfig(),
   ]);
 
   const activeChildren = allChildren.filter((c) => c.active);
@@ -58,6 +61,17 @@ export default async function SettingsPage() {
           Manage children, experiences, and places.
         </p>
       </div>
+
+      {/* ── Home location ── */}
+      <section id="location">
+        <SectionHeader title="Location" icon={Home} />
+        <div className="rounded-lg border bg-card p-4">
+          <HomeLocationForm
+            currentPostcode={config?.homePostcode ?? null}
+            hasCoords={config?.homeLatitude != null}
+          />
+        </div>
+      </section>
 
       {/* ── Children ── */}
       <section id="children">

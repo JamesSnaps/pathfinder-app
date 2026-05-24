@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getAllPlaces } from "@/lib/places-queries";
+import { getAppConfig } from "@/lib/settings-queries";
+import { haversineDistanceMiles, formatMiles } from "@/lib/distance";
 import { MapPin, Phone, Globe, ExternalLink, Map, List } from "lucide-react";
 import { PlacesMapLoader } from "@/components/places/places-map-loader";
 import type { MapPlace } from "@/components/places/places-map";
@@ -12,7 +14,10 @@ export default async function PlacesPage({ searchParams }: Props) {
   const { view } = await searchParams;
   const isMapView = view === "map";
 
-  const places = await getAllPlaces();
+  const [places, config] = await Promise.all([getAllPlaces(), getAppConfig()]);
+  const home = config?.homeLatitude != null && config.homeLongitude != null
+    ? { lat: config.homeLatitude, lng: config.homeLongitude }
+    : null;
 
   const mappablePlaces: MapPlace[] = places
     .filter((p) => p.latitude != null && p.longitude != null)
@@ -66,7 +71,7 @@ export default async function PlacesPage({ searchParams }: Props) {
 
       {isMapView ? (
         <div className="space-y-4">
-          <PlacesMapLoader places={mappablePlaces} height="520px" />
+          <PlacesMapLoader places={mappablePlaces} height="520px" homeLocation={home ?? undefined} />
           {mappablePlaces.length < places.length && (
             <p className="text-xs text-muted-foreground">
               {places.length - mappablePlaces.length} place{places.length - mappablePlaces.length !== 1 ? "s" : ""} without coordinates — edit them to add to the map.
@@ -108,13 +113,18 @@ export default async function PlacesPage({ searchParams }: Props) {
                   <div className="min-w-0 space-y-1.5">
                     <p className="text-sm font-medium text-foreground">{place.name}</p>
 
-                    {(place.location || place.distanceMinutes) && (
+                    {(place.location || place.distanceMinutes || (home && place.latitude && place.longitude)) && (
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3 shrink-0" />
                         {place.location}
                         {place.distanceMinutes && (
                           <span className="text-muted-foreground/70">
-                            · {place.distanceMinutes} min away
+                            · {place.distanceMinutes} min
+                          </span>
+                        )}
+                        {home && place.latitude != null && place.longitude != null && (
+                          <span className="text-muted-foreground/70">
+                            · {formatMiles(haversineDistanceMiles(home.lat, home.lng, place.latitude, place.longitude))}
                           </span>
                         )}
                       </div>

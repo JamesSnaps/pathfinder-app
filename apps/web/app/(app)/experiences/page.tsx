@@ -115,10 +115,12 @@ export default async function ExperiencesPage({ searchParams }: PageProps) {
                 href={`/experiences/${exp.id}`}
                 className="flex items-center gap-4 px-4 py-3 hover:bg-accent/50 transition-colors"
               >
-                {/* Category colour strip */}
-                <span className={cn("shrink-0 inline-block rounded-full px-2 py-0.5 text-xs font-medium", catColour)}>
-                  {exp.category}
-                </span>
+                {/* Category colour strip — fixed width so title column stays aligned */}
+                <div className="shrink-0 w-36 flex justify-center">
+                  <span className={cn("inline-block rounded-full px-2 py-0.5 text-xs font-medium text-center", catColour)}>
+                    {exp.category}
+                  </span>
+                </div>
 
                 {/* Title + description */}
                 <div className="min-w-0 flex-1">

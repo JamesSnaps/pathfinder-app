@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Trash2, Plus, MapPin, Phone, Globe, ExternalLink, ArrowLeft } from "lucide-react";
+import { haversineDistanceMiles, formatMiles } from "@/lib/distance";
 import {
   Button,
   Input,
@@ -43,6 +44,7 @@ interface Props {
   experienceId: string;
   linkedPlaces: LinkedPlace[];
   allPlaces: AvailablePlace[];
+  homeLocation?: { lat: number; lng: number } | null;
 }
 
 function minAgeLabel(months: number): string {
@@ -52,7 +54,7 @@ function minAgeLabel(months: number): string {
   return `${years}y ${rem}mo+`;
 }
 
-export function ExperiencePlacesEditor({ experienceId, linkedPlaces, allPlaces }: Props) {
+export function ExperiencePlacesEditor({ experienceId, linkedPlaces, allPlaces, homeLocation }: Props) {
   const [adding, setAdding] = useState(false);
   const [createMode, setCreateMode] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -112,11 +114,17 @@ export function ExperiencePlacesEditor({ experienceId, linkedPlaces, allPlaces }
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{place.name}</p>
-                {place.location && (
+                {(place.location || place.distanceMinutes || (homeLocation && place.latitude != null && place.longitude != null)) && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                     <MapPin className="h-3 w-3 shrink-0" />
                     {place.location}
                     {place.distanceMinutes && ` · ${place.distanceMinutes} min`}
+                    {homeLocation && place.latitude != null && place.longitude != null && (
+                      <span>
+                        {" · "}
+                        {formatMiles(haversineDistanceMiles(homeLocation.lat, homeLocation.lng, place.latitude, place.longitude))}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
